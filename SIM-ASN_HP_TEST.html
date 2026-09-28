@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistem Manajemen Data ASN</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#0879d1;color:#fff;padding:18px 20px}header h1{margin:0;font-size:22px}header p{margin:5px 0 0;opacity:.9}
+.layout{display:flex;min-height:calc(100vh - 92px)}aside{width:230px;background:#10243e;color:white;padding:14px}
+aside button{display:block;width:100%;padding:12px;margin:5px 0;border:0;border-radius:8px;background:transparent;color:white;text-align:left;font-size:14px}
+aside button:hover,aside button.active{background:#0879d1}.main{flex:1;padding:20px;max-width:1100px;margin:auto;width:100%}
+.card{background:white;border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 2px 10px #00000010}
+h2{margin-top:0;color:#123b63}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+label{font-weight:bold;font-size:13px}input,select,textarea{width:100%;margin-top:6px;padding:10px;border:1px solid #ccd5e0;border-radius:7px;font-size:14px}textarea{min-height:80px}
+.btn{border:0;border-radius:7px;padding:10px 15px;background:#0879d1;color:white;cursor:pointer;margin:4px 4px 4px 0}.danger{background:#d83b3b}.secondary{background:#64748b}
+table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #dbe2ea;padding:9px;text-align:left;font-size:13px}th{background:#eef5fb}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0c4d83}.login .card{width:min(420px,92vw)}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#e6f4ff;color:#0767aa;font-size:12px}
+@media(max-width:700px){.layout{display:block}aside{width:100%;display:flex;overflow:auto;gap:5px}aside button{min-width:145px}.grid{grid-template-columns:1fr}.main{padding:12px}table{display:block;overflow:auto}}
+@media print{aside,.no-print,header{display:none!important}.layout{display:block}.main{max-width:none}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const key='simASN_single';
+const state=JSON.parse(localStorage.getItem(key)||'null')||{
+ user:{nama:'Syahrin Noor, S.E.',nip:'',tempatTanggalLahir:'',alamat:'',agama:'',email:'',npwp:'',taspen:'',bpjs:''},
+ peg:{jabatan:'',golongan:'',tmtPns:'',skCpns:'',skPns:'',kenaikanGaji:'',diklatStruktural:''},
+ jabatan:[], penghargaan:[], pendidikan:[], dokumen:[]
+};
+function save(){localStorage.setItem(key,JSON.stringify(state))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function input(label,id,val,type='text'){return `<label>${label}<input id="${id}" type="${type}" value="${esc(val)}"></label>`}
+function nav(){return `<aside>
+<button onclick="page('home')">🏠 Dashboard</button>
+<button onclick="page('utama')">👤 Data Utama ASN</button>
+<button onclick="page('peg')">💼 Kepegawaian</button>
+<button onclick="page('diklat')">📚 Diklat Struktural</button>
+<button onclick="page('jabatan')">📋 Riwayat Jabatan</button>
+<button onclick="page('penghargaan')">🏆 Riwayat Penghargaan</button>
+<button onclick="page('pendidikan')">🎓 Riwayat Pendidikan</button>
+<button onclick="page('dokumen')">📎 Dokumen Kepegawaian</button>
+<button onclick="printProfile()">🖨️ Cetak Profil ASN</button>
+</aside>`}
+function shell(content){document.getElementById('app').innerHTML=`<header><h1>Sistem Manajemen Data ASN</h1><p>Portal Layanan & Pendataan Kepegawaian</p></header><div class="layout">${nav()}<main class="main">${content}</main></div>`}
+function page(p){
+ if(p==='home')return shell(`<div class="card"><h2>Dashboard</h2><p>Selamat datang, <b>${esc(state.user.nama)}</b></p><span class="badge">1 ASN simulasi</span></div><div class="card"><h2>Modul Data ASN</h2><p>Gunakan menu di samping untuk mengisi dan menguji setiap bagian sesuai rancangan pembimbing.</p></div>`);
+ if(p==='utama')return shell(`<div class="card"><h2>1. Data Utama ASN</h2><div class="grid">
+${input('Nama','nama',state.user.nama)}${input('NIP','nip',state.user.nip)}${input('Tempat, tanggal lahir','ttl',state.user.tempatTanggalLahir)}${input('Alamat','alamat',state.user.alamat)}${input('Agama','agama',state.user.agama)}${input('Email','email',state.user.email,'email')}${input('Nomor NPWP','npwp',state.user.npwp)}${input('Nomor Taspen','taspen',state.user.taspen)}${input('Nomor BPJS','bpjs',state.user.bpjs)}</div><button class="btn" onclick="saveUtama()">Simpan Data</button></div>`);
+ if(p==='peg')return shell(`<div class="card"><h2>2. Kepegawaian</h2><div class="grid">
+${input('Jabatan','jabatanUt',state.peg.jabatan)}${input('Golongan/Ruang','gol',state.peg.golongan)}${input('TMT PNS','tmt',state.peg.tmtPns,'date')}
+${input('SK CPNS','skc',state.peg.skCpns)}${input('SK PNS','skp',state.peg.skPns)}${input('Kenaikan Gaji Berkala','gaji',state.peg.kenaikanGaji)}</div><button class="btn" onclick="savePeg()">Simpan</button><p>Dokumen SK dapat diuji melalui menu <b>Dokumen Kepegawaian</b>.</p></div>`);
+ if(p==='diklat')return shell(`<div class="card"><h2>3. Diklat Struktural</h2><div class="grid">${input('Nama/Jenis Diklat','diklat',state.peg.diklatStruktural)}${input('Dokumen Diklat','diklatFile','','file')}</div><button class="btn" onclick="saveDiklat()">Simpan Diklat</button><div id="diklatStatus"></div></div>`);
+ if(p==='jabatan')return shell(`<div class="card"><h2>4. Riwayat Jabatan</h2><div class="grid">${input('Jabatan','rj1','')}${input('Unit kerja','rj2','')}${input('Golongan','rj3','')}${input('TMT Jabatan','rj4','','date')}${input('Tanggal selesai','rj5','','date')}${input('Nomor SK','rj6','')}${input('Tanggal SK','rj7','','date')}${input('Keterangan','rj8','')}</div><button class="btn" onclick="addJabatan()">Tambah Riwayat</button>${table(state.jabatan,['Jabatan','Unit kerja','Golongan','TMT Jabatan','Tanggal selesai','Nomor SK','Tanggal SK','Keterangan'])}</div>`);
+ if(p==='penghargaan')return shell(`<div class="card"><h2>5. Riwayat Penghargaan</h2><div class="grid">${input('Nama penghargaan','rh1','')}${input('Tingkat penghargaan','rh2','')}${input('Tahun','rh3','','number')}${input('Nomor sertifikat/SK','rh4','')}${input('Keterangan','rh5','')}</div><button class="btn" onclick="addPeng()">Tambah Penghargaan</button>${table(state.penghargaan,['Nama penghargaan','Tingkat','Tahun','Nomor sertifikat/SK','Keterangan'])}</div>`);
+ if(p==='pendidikan')return shell(`<div class="card"><h2>6. Riwayat Pendidikan</h2><div class="grid">${input('Jenjang pendidikan','rp1','')}${input('Nama sekolah/perguruan tinggi','rp2','')}${input('Program studi','rp3','')}${input('Tahun lulus','rp4','','number')}${input('Nomor ijazah','rp5','')}${input('Gelar','rp6','')}${input('Upload ijazah','rp7','','file')}</div><button class="btn" onclick="addPend()">Tambah Pendidikan</button>${table(state.pendidikan,['Jenjang','Sekolah/PT','Program studi','Tahun lulus','Nomor ijazah','Gelar'])}</div>`);
+ if(p==='dokumen')return shell(`<div class="card"><h2>7. Dokumen Kepegawaian</h2><p>Upload dan simpan nama dokumen untuk simulasi.</p><div class="grid">${input('Jenis dokumen','dk1','')}${input('File','dk2','','file')}</div><button class="btn" onclick="addDok()">Tambah Dokumen</button>${table(state.dokumen,['Jenis dokumen','Nama file'])}</div>`);
+}
+function table(arr,heads){if(!arr.length)return '<p>Belum ada data.</p>';return '<table><tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr>'+arr.map(r=>'<tr>'+r.map(x=>`<td>${esc(x)}</td>`).join('')+'</tr>').join('')+'</table>'}
+function val(id){return document.getElementById(id)?.value||''}
+function saveUtama(){Object.assign(state.user,{nama:val('nama'),nip:val('nip'),tempatTanggalLahir:val('ttl'),alamat:val('alamat'),agama:val('agama'),email:val('email'),npwp:val('npwp'),taspen:val('taspen'),bpjs:val('bpjs')});save();alert('Data Utama ASN tersimpan.')}
+function savePeg(){Object.assign(state.peg,{jabatan:val('jabatanUt'),golongan:val('gol'),tmtPns:val('tmt'),skCpns:val('skc'),skPns:val('skp'),kenaikanGaji:val('gaji')});save();alert('Data Kepegawaian tersimpan.')}
+function saveDiklat(){state.peg.diklatStruktural=val('diklat');save();alert('Data Diklat Struktural tersimpan.')}
+function addJabatan(){state.jabatan.push([val('rj1'),val('rj2'),val('rj3'),val('rj4'),val('rj5'),val('rj6'),val('rj7'),val('rj8')]);save();page('jabatan')}
+function addPeng(){state.penghargaan.push([val('rh1'),val('rh2'),val('rh3'),val('rh4'),val('rh5')]);save();page('penghargaan')}
+function addPend(){state.pendidikan.push([val('rp1'),val('rp2'),val('rp3'),val('rp4'),val('rp5'),val('rp6')]);save();page('pendidikan')}
+function addDok(){let f=document.getElementById('dk2').files[0];state.dokumen.push([val('dk1'),f?f.name:'']);save();page('dokumen')}
+function printProfile(){window.print()}
+function login(){document.getElementById('app').innerHTML=`<div class="login"><div class="card"><h2>Masuk ke Sistem</h2><p><b>Simulasi Tahap 1</b></p><button class="btn" style="width:100%" onclick="page('home')">Syahrin Noor, S.E.</button></div></div>`}
+login();
+</script>
+</body>
+</html>
